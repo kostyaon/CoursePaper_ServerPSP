@@ -8,7 +8,7 @@ import java.net.Socket;
 public class Server {
     public static int counter = 0;
 
-    public static void main(String[] args) throws IOException {
+    public static void start() throws IOException {
         ServerSocket serverSocket = new ServerSocket(3333);
         System.out.println("SERVER is starting...");
 
