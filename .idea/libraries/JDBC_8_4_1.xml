@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="JDBC-8.4.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/JDBCdriver/sqljdbc_8.4.1.0_rus/sqljdbc_8.4/rus/mssql-jdbc-8.4.1.jre14.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://$USER_HOME$/Downloads/JDBCdriver/sqljdbc_8.4.1.0_rus/sqljdbc_8.4/rus/auth/x64" />
+    </NATIVE>
+    <SOURCES />
+  </library>
+</component>
