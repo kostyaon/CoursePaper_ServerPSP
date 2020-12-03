@@ -8,43 +8,30 @@ import java.net.Socket;
 
 public class ClientHandler extends Thread {
     final Socket socket;
-    final DataInputStream in;
-    final DataOutputStream out;
     final ObjectInputStream inObj;
     final ObjectOutputStream outObj;
-
-    public ClientHandler(Socket socket, DataInputStream in, DataOutputStream out) {
-        this.socket = socket;
-        this.in = in;
-        this.out = out;
-        this.inObj = null;
-        this.outObj = null;
-    }
 
     public ClientHandler(Socket socket, ObjectInputStream inObj, ObjectOutputStream outObj){
         this.socket = socket;
         this.inObj = inObj;
         this.outObj = outObj;
-        this.in = null;
-        this.out = null;
     }
 
     private void checkPassword() {
         String nickname = null;
         String password = null;
         try {
-            nickname = in.readUTF(); //Get TNickname
+            nickname = (String) inObj.readObject(); //Get TNickname
             System.out.println("CLIENT >> NICKNAME:" + nickname);
-            password = in.readUTF(); //Get TPassword
+            password = (String) inObj.readObject(); //Get TPassword
             System.out.println("CLIENT >> PASSWORD:" + password);
 
             //Connect to the DB and find the password
             DBConnection connection = new DBConnection();
             String access = connection.getAccess(nickname, password);
-            out.writeUTF(access);
-            out.flush();
+            outObj.writeObject(access);
+            outObj.flush();
             connection.closeConnection();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,7 +48,7 @@ public class ClientHandler extends Thread {
 
             //Connect to the Db and add user
             DBConnection connection = new DBConnection();
-            String res = connection.addUser(user, password);
+            String res = connection.addUserDB(user, password);
             outObj.writeObject(res);
             outObj.flush();
             connection.closeConnection();
@@ -72,11 +59,34 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
-        //checkPassword();
-        addUser();
+        String choose;
         try {
-            this.in.close();
-            this.out.close();
+            while(true){
+                //Choose a functionallity
+                choose = (String) inObj.readObject();
+
+                switch (choose){
+                    case "Login":
+                        checkPassword();
+                        break;
+                    case "Signup":
+                        addUser();
+                        break;
+                    case "Exit":
+                        socket.close();
+                        System.out.println("SERVER >> CLIENT IS DISCONNECTED");
+                        break;
+                }
+
+                //TODO: Add extra functionallity
+
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        try {
+            inObj.close();
+            outObj.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
