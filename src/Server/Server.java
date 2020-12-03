@@ -1,7 +1,6 @@
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.IOException;
+package Server;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -24,9 +23,12 @@ public class Server {
                 DataInputStream in = new DataInputStream(clientSocket.getInputStream());
                 DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
 
+                ObjectInputStream inObj = new ObjectInputStream(clientSocket.getInputStream());
+                ObjectOutputStream outObj = new ObjectOutputStream(clientSocket.getOutputStream());
+
                 System.out.println("Assigning new thread for this client");
 
-                Thread thread = new ClientHandler(clientSocket, in, out);
+                Thread thread = new ClientHandler(clientSocket, inObj, outObj);
                 thread.start();
 
             }catch (Exception e){

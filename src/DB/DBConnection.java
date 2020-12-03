@@ -1,3 +1,7 @@
+package DB;
+
+import Models.User;
+
 import java.sql.*;
 
 public class DBConnection {
@@ -17,8 +21,40 @@ public class DBConnection {
         }
     }
 
+    public void closeConnection() throws SQLException {
+        connection.close();
+    }
+
+    public String addUser(User user, String password){
+        sql = "INSERT INTO Users (Nickname, Specialization, Country)" +
+                " VALUES ('"+ user.getNickname() + "', '" + user.getSpecialization() +
+                "', '" + user.getCountry() + "');";
+        try{
+            //Add User
+            int rows = statement.executeUpdate(sql);
+            System.out.println("SERVER >> " + rows + " row has been added!");
+
+            //Find the UserID
+            sql = "SELECT UserID FROM USERS WHERE Nickname='" + user.getNickname() + "';";
+            resultSet = statement.executeQuery(sql);
+            resultSet.next();
+            int id = resultSet.getInt("UserID");
+
+            //Add password
+            sql = "INSERT INTO PrivateData (UserPassword, UserID)" +
+                    " VALUES ('"+ password + "', " + id + ");";
+            rows = statement.executeUpdate(sql);
+            System.out.println("SERVER >> " + rows + " password has been added!");
+
+            return "Success";
+        }catch (SQLException e){
+            e.printStackTrace();
+            return "Error";
+        }
+    }
+
     public String getAccess(String nickname, String password){
-        String pswrd= findPassword(nickname);
+        String pswrd = findPassword(nickname);
         if (pswrd.equals(password)){
             return "Access";
         }else{
@@ -48,25 +84,4 @@ public class DBConnection {
         return password;
     }
 
-
-    /*public static void start() {
-        String connectionUrl = "jdbc:sqlserver://localhost:1433;databaseName=CP_DB;integratedSecurity=true";
-
-        try (Connection connection = DriverManager.getConnection(connectionUrl)){
-            System.out.println("Successfully connected to the SQL SERVER!");
-            String sql = "SELECT * FROM Users;";
-            try (Statement statement = connection.createStatement();
-                 ResultSet resultSet = statement.executeQuery(sql)){
-                while(resultSet.next()) {
-                    System.out.println(
-                            "\nUSER ID:" + resultSet.getInt(1) + "\nNickName:" + resultSet.getString(2)
-                                    + "\nSpecialization:" + resultSet.getString(3) + "\nCountry:" + resultSet.getString(4));
-                    System.out.println("///////////////////////////////////////////////////////////////////////////////////////////");
-                }
-                connection.close();
-            }
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-    }*/
 }
