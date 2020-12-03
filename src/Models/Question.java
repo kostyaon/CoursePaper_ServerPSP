@@ -1,9 +1,21 @@
 package Models;
 
-public class Question {
+import java.io.Serializable;
+
+public class Question implements Serializable {
+    private int questID;
     private String theme;
     private int level;
     private String question;
+
+    public Question(String question, int id){
+        this.questID = id;
+        this.question = question;
+    }
+
+    public int getQuestID() {
+        return questID;
+    }
 
     public void setLevel(int level) {
         this.level = level;

@@ -1,10 +1,15 @@
 package Server;
 
 import DB.DBConnection;
+import Models.Answer;
+import Models.Question;
 import Models.User;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class ClientHandler extends Thread {
     final Socket socket;
@@ -55,6 +60,53 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private void sendAnswerList(List<Question> questionList, int index){
+        int questId = 0;
+        try{
+            //Connect to the DB and
+            DBConnection connection = new DBConnection();
+            questId = questionList.get(index).getQuestID();
+
+            //Get answerList for the questID
+            List<Answer> answerList = connection.answerList(questId);
+
+            //Send our List of all Answers to the client
+            outObj.writeObject(answerList);
+            outObj.flush();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void sendQuestList(){
+        String theme;
+        int level;
+        int numberOfQuest;
+        List<Question> questionList = null;
+        try {
+            //Get selected topic
+            theme = (String) inObj.readObject();
+            System.out.println("SERVER >> CLIENT THEME:" + theme);
+
+            //Get selected level
+            level = (int) inObj.readObject();
+            System.out.println("SERVER >> CLIENT LEVEL:" + level);
+
+            //Get selected number of question
+            numberOfQuest = (int) inObj.readObject();
+            System.out.println("SERVER >> NUMBER OF QUEST:" + numberOfQuest);
+
+            //Get A list of question from DB
+            DBConnection connection = new DBConnection();
+            questionList = connection.questionList(theme, level, numberOfQuest);
+            outObj.writeObject(questionList);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     private void addUser(){
         User user;
         String password;
@@ -92,6 +144,14 @@ public class ClientHandler extends Thread {
                         break;
                     case "Signup":
                         addUser();
+                        break;
+                    case "StartTest":
+                        sendQuestList();
+                        break;
+                    case "Answer":
+                        List<Question> questionList = (List<Question>) inObj.readObject();
+                        int index = (int) inObj.readObject();
+                        sendAnswerList(questionList, index);
                         break;
                     case "Exit":
                         socket.close();

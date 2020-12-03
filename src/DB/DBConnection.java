@@ -1,8 +1,12 @@
 package DB;
 
+import Models.Answer;
+import Models.Question;
 import Models.User;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DBConnection {
     private String connectionUrl;
@@ -83,6 +87,50 @@ public class DBConnection {
         }
         sumRate /= counter;
         return sumRate;
+    }
+
+    public List<Question> questionList(String questTheme, int questLevel, int numberOfQuest){
+        //TODO: We can use a fixed size of Array
+        List<Question> questList = new ArrayList<>();
+
+        //TODO: CHANGE TOP 3 on TOP 10
+        sql = "SELECT Question, QuestID FROM Question WHERE Question IN" + "(SELECT TOP " + numberOfQuest + " Question FROM Question WHERE QuestTheme='"
+                + questTheme + "' AND QuestLevel=" + questLevel + " ORDER BY NEWID());";
+        try{
+            //Get 10 random Question
+            ResultSet resultSet = statement.executeQuery(sql);
+            while(resultSet.next()){
+                Question question = new Question(resultSet.getString("Question"), resultSet.getInt("QuestID"));
+                questList.add(question);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        //Return 10 question for the WHOLE TEST
+        return questList;
+    }
+
+    public List<Answer> answerList(int questID){
+        //TODO: We can use a fixed size of Array
+        List<Answer> answerList= new ArrayList<>();
+        sql = "SELECT Answer, Correctness FROM Answer"
+        + " INNER JOIN QuestAnswer ON Answer.AnswerID = QuestAnswer.AnswerID"
+       + " WHERE QuestID=" + questID + ";";
+        try{
+            //Get 3 Answers
+            ResultSet resultSet = statement.executeQuery(sql);
+            while(resultSet.next()){
+                //Fill Answers for our List
+                Answer answer = new Answer(resultSet.getString("Answer"), resultSet.getBoolean("Correctness"));
+                answerList.add(answer);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        //Return a list of answers to the ONE question
+        return answerList;
     }
 
     private String findPassword(String nickname){
