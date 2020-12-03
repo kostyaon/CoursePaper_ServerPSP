@@ -18,8 +18,8 @@ public class ClientHandler extends Thread {
     }
 
     private void checkPassword() {
-        String nickname = null;
-        String password = null;
+        String nickname;
+        String password;
         try {
             nickname = (String) inObj.readObject(); //Get TNickname
             System.out.println("CLIENT >> NICKNAME:" + nickname);
@@ -37,14 +37,34 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private void countRate(){
+        String nickname;
+        try{
+            //Get nickname
+            nickname = (String)inObj.readObject();
+            System.out.println("SERVER >> CLIENT Nickname: " + nickname);
+
+            //Connect to the DB and return summary rating
+            DBConnection connection = new DBConnection();
+            float rating = connection.countSumRateDB(nickname);
+            outObj.writeObject(rating);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     private void addUser(){
         User user;
         String password;
         try{
-            user = (User) inObj.readObject(); //Get User to add in DB
+            //Get User to add in DB
+            user = (User) inObj.readObject();
             System.out.println("CLIENT >> User: " + user.toString());
 
-            password = (String) inObj.readObject();//Get password to add in DB
+            //Get password to add in DB
+            password = (String) inObj.readObject();
 
             //Connect to the Db and add user
             DBConnection connection = new DBConnection();
@@ -62,12 +82,13 @@ public class ClientHandler extends Thread {
         String choose;
         try {
             while(true){
-                //Choose a functionallity
+                //Choose a functionality
                 choose = (String) inObj.readObject();
 
                 switch (choose){
                     case "Login":
                         checkPassword();
+                        countRate();
                         break;
                     case "Signup":
                         addUser();

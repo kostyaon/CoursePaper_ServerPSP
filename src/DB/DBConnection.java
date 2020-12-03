@@ -61,6 +61,30 @@ public class DBConnection {
         }
     }
 
+    public float countSumRateDB(String nickname){
+        int counter = 0;
+        float sumRate = 0;
+        sql = "SELECT UserID FROM Users WHERE Nickname='" + nickname + "';";
+        try{
+            //Find UserID
+            ResultSet resultSet = statement.executeQuery(sql);
+            resultSet.next();
+            int id = resultSet.getInt("UserID");
+
+            //Count summary Rating
+            sql = "SELECT Rating FROM Rating WHERE UserID=" + id + ";";
+            resultSet = statement.executeQuery(sql);
+            while(resultSet.next()){
+                counter++;
+                sumRate += resultSet.getInt("Rating");
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        sumRate /= counter;
+        return sumRate;
+    }
+
     private String findPassword(String nickname){
         String password = null;
         sql = "SELECT UserID FROM Users WHERE Nickname='" + nickname + "';";
