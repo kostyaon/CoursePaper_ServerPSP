@@ -4,6 +4,15 @@ public class Rating {
     private String testTheme;
     private int testLevel;
     private float rating;
+    private int userID;
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public int getUserID() {
+        return userID;
+    }
 
     public void setRating(float rating) {
         this.rating = rating;

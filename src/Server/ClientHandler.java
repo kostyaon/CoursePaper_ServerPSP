@@ -129,6 +129,10 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private void sendUser(){
+
+    }
+
     @Override
     public void run() {
         String choose;
@@ -152,6 +156,12 @@ public class ClientHandler extends Thread {
                         List<Question> questionList = (List<Question>) inObj.readObject();
                         int index = (int) inObj.readObject();
                         sendAnswerList(questionList, index);
+                        break;
+                    case "Insert rate":
+
+                        break;
+                    case "Get User":
+
                         break;
                     case "Exit":
                         socket.close();
