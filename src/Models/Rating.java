@@ -1,6 +1,8 @@
 package Models;
 
-public class Rating {
+import java.io.Serializable;
+
+public class Rating implements Serializable {
     private String testTheme;
     private int testLevel;
     private float rating;
