@@ -2,6 +2,7 @@ package DB;
 
 import Models.Answer;
 import Models.Question;
+import Models.Rating;
 import Models.User;
 
 import java.sql.*;
@@ -155,4 +156,35 @@ public class DBConnection {
         return password;
     }
 
+    public User findUser(String nickname){
+        User user = null;
+        sql = "SELECT * FROM Users WHERE Nickname='" + nickname + "';";
+        try{
+            ResultSet resultSet = statement.executeQuery(sql);
+            resultSet.next();
+
+            user = new User(resultSet.getString("Nickname"), resultSet.getString("Specialization"), resultSet.getString("Country"));
+            user.setUserID(resultSet.getInt("UserID"));
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    public String setRating(Rating rating){
+        sql = "INSERT INTO Rating (TestTheme, TestLevel, Rating, UserID)" +
+                " VALUES ('" + rating.getTestTheme() + "', '" + rating.getTestLevel() + "', " + rating.getRating() +
+                ", " + rating.getUserID() + ");";
+        int rows;
+        String res;
+        try{
+            rows = statement.executeUpdate(sql);
+            System.out.println("SERVER >> " + rows + " Rating has been added!");
+            res = "Success";
+        }catch (SQLException e){
+            e.printStackTrace();
+            res = "Error";
+        }
+        return res;
+    }
 }

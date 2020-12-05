@@ -3,6 +3,7 @@ package Server;
 import DB.DBConnection;
 import Models.Answer;
 import Models.Question;
+import Models.Rating;
 import Models.User;
 
 import java.io.*;
@@ -130,7 +131,42 @@ public class ClientHandler extends Thread {
     }
 
     private void sendUser(){
+        String nickname;
+        User user;
+        try{
+            //Get a nickname
+            nickname = (String) inObj.readObject();
 
+            //Retrieve data from DB
+            DBConnection connection = new DBConnection();
+            user = connection.findUser(nickname);
+
+            //Send user to the Client
+            outObj.writeObject(user);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void sendRating(){
+        Rating rating;
+        String res;
+        try{
+            //Get Rating
+            rating = (Rating) inObj.readObject();
+
+            //Retrieve data from DB
+            DBConnection connection = new DBConnection();
+            res = connection.setRating(rating);
+
+            outObj.writeObject(res);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -144,6 +180,7 @@ public class ClientHandler extends Thread {
                 switch (choose){
                     case "Login":
                         checkPassword();
+                        sendUser();
                         countRate();
                         break;
                     case "Signup":
@@ -158,10 +195,7 @@ public class ClientHandler extends Thread {
                         sendAnswerList(questionList, index);
                         break;
                     case "Insert rate":
-
-                        break;
-                    case "Get User":
-
+                        sendRating();
                         break;
                     case "Exit":
                         socket.close();

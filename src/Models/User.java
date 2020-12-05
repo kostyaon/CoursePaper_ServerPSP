@@ -3,6 +3,7 @@ package Models;
 import java.io.Serializable;
 
 public class User implements Serializable {
+    private int userID;
     private String nickname;
     private String specialization;
     private String country;
@@ -19,6 +20,13 @@ public class User implements Serializable {
         this.specialization = specialization;
     }
 
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public int getUserID() {
+        return userID;
+    }
 
     public void setCountry(String country) {
         this.country = country;
