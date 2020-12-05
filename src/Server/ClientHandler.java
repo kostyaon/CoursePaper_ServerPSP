@@ -159,7 +159,7 @@ public class ClientHandler extends Thread {
                         break;
                 }
 
-                //TODO: Add extra functionallity
+                //TODO: Add extra functionality
 
             }
         }catch (Exception e){
