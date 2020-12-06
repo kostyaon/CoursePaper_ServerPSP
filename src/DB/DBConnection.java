@@ -152,6 +152,7 @@ public class DBConnection {
             password = resultSet.getString("UserPassword");
         }catch (Exception e){
             e.printStackTrace();
+            password = "Error";
         }
         return password;
     }

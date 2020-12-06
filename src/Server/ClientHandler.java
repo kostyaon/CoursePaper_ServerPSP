@@ -23,9 +23,10 @@ public class ClientHandler extends Thread {
         this.outObj = outObj;
     }
 
-    private void checkPassword() {
+    private String checkPassword() {
         String nickname;
         String password;
+        String access = null;
         try {
             nickname = (String) inObj.readObject(); //Get TNickname
             System.out.println("CLIENT >> NICKNAME:" + nickname);
@@ -34,13 +35,15 @@ public class ClientHandler extends Thread {
 
             //Connect to the DB and find the password
             DBConnection connection = new DBConnection();
-            String access = connection.getAccess(nickname, password);
+            access = connection.getAccess(nickname, password);
             outObj.writeObject(access);
             outObj.flush();
             connection.closeConnection();
         } catch (Exception e) {
             e.printStackTrace();
+            access = "ERROR";
         }
+        return access;
     }
 
     private void countRate(){
@@ -80,6 +83,8 @@ public class ClientHandler extends Thread {
     }
 
     private void sendQuestList(){
+        String errMSG;
+
         String theme;
         int level;
         int numberOfQuest;
@@ -179,9 +184,11 @@ public class ClientHandler extends Thread {
 
                 switch (choose){
                     case "Login":
-                        checkPassword();
-                        sendUser();
-                        countRate();
+                        String access = checkPassword();
+                        if (access.equalsIgnoreCase("Access")){
+                            sendUser();
+                            countRate();
+                        }
                         break;
                     case "Signup":
                         addUser();
@@ -200,10 +207,8 @@ public class ClientHandler extends Thread {
                     case "Exit":
                         socket.close();
                         System.out.println("SERVER >> CLIENT IS DISCONNECTED");
-                        break;
+                        return;
                 }
-
-                //TODO: Add extra functionality
 
             }
         }catch (Exception e){
