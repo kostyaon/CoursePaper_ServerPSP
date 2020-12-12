@@ -210,6 +210,67 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private void sendUserList(){
+        List<User>userList;
+        try {
+            DBConnection connection = new DBConnection();
+            userList = connection.getUserList();
+
+            outObj.writeObject(userList);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void updateAdmin(){
+        try{
+            //Retrieve userID
+            int userID = (int) inObj.readObject();
+
+            DBConnection connection = new DBConnection();
+            String success = connection.updateAdmin(userID);
+
+            outObj.writeObject(success);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void delUser(){
+        try{
+            //Retrieve userID
+            int userID = (int) inObj.readObject();
+
+            DBConnection connection = new DBConnection();
+            String success = connection.delUser(userID);
+
+            outObj.writeObject(success);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void addTest(){
+        Question question;
+        Answer answer;
+        try{
+            question = (Question) inObj.readObject();
+            answer = (Answer) inObj.readObject();
+
+            DBConnection connection = new DBConnection();
+            connection.addTestDB(question, answer);
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         String choose;
@@ -243,6 +304,20 @@ public class ClientHandler extends Thread {
                         break;
                     case "Rating":
                         sendRatingList();
+                        break;
+                    case "User list":
+                        sendUserList();
+                        break;
+                    case "Setdel":
+                        String check = (String) inObj.readObject();
+                        if (check.equalsIgnoreCase("Set")){
+                            updateAdmin();
+                        }else{
+                            delUser();
+                        }
+                        break;
+                    case "Test":
+                        addTest();
                         break;
                     case "Exit":
                         socket.close();

@@ -12,12 +12,12 @@ public class DBConnection {
     private Statement statement;
     private String sql;
 
-    public DBConnection(){
-        try{
+    public DBConnection() {
+        try {
             this.connectionUrl = "jdbc:sqlserver://localhost:1433;databaseName=CP_DB;integratedSecurity=true";
             this.connection = DriverManager.getConnection(connectionUrl);
             this.statement = connection.createStatement();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -26,11 +26,11 @@ public class DBConnection {
         connection.close();
     }
 
-    public String addUserDB(User user, String password){
+    public String addUserDB(User user, String password) {
         sql = "INSERT INTO Users (Nickname, Specialization, Country)" +
-                " VALUES ('"+ user.getNickname() + "', '" + user.getSpecialization() +
+                " VALUES ('" + user.getNickname() + "', '" + user.getSpecialization() +
                 "', '" + user.getCountry() + "');";
-        try{
+        try {
             //Add User
             int rows = statement.executeUpdate(sql);
             System.out.println("SERVER >> " + rows + " row has been added!");
@@ -43,31 +43,31 @@ public class DBConnection {
 
             //Add password
             sql = "INSERT INTO PrivateData (UserPassword, UserID)" +
-                    " VALUES ('"+ password + "', " + id + ");";
+                    " VALUES ('" + password + "', " + id + ");";
             rows = statement.executeUpdate(sql);
             System.out.println("SERVER >> " + rows + " password has been added!");
 
             return "Success";
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
             return "Error: You are not unique! Come up with a new nickname!";
         }
     }
 
-    public String getAccess(String nickname, String password){
+    public String getAccess(String nickname, String password) {
         String pswrd = findPassword(nickname);
-        if (pswrd.equals(password)){
+        if (pswrd.equals(password)) {
             return "Access";
-        }else{
+        } else {
             return "Denied";
         }
     }
 
-    public float countSumRateDB(String nickname){
+    public float countSumRateDB(String nickname) {
         int counter = 0;
         float sumRate = 0;
         sql = "SELECT UserID FROM Users WHERE Nickname='" + nickname + "';";
-        try{
+        try {
             //Find UserID
             ResultSet resultSet = statement.executeQuery(sql);
             resultSet.next();
@@ -76,30 +76,30 @@ public class DBConnection {
             //Count summary Rating
             sql = "SELECT Rating FROM Rating WHERE UserID=" + id + ";";
             resultSet = statement.executeQuery(sql);
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 counter++;
                 sumRate += resultSet.getInt("Rating");
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         sumRate /= counter;
         return sumRate;
     }
 
-    public List<Question> questionList(String questTheme, int questLevel, int numberOfQuest){
+    public List<Question> questionList(String questTheme, int questLevel, int numberOfQuest) {
         List<Question> questList = new ArrayList<>();
 
         sql = "SELECT Question, QuestID FROM Question WHERE Question IN" + "(SELECT TOP " + numberOfQuest + " Question FROM Question WHERE QuestTheme='"
                 + questTheme + "' AND QuestLevel=" + questLevel + " ORDER BY NEWID());";
-        try{
+        try {
             //Get 10 random Question
             ResultSet resultSet = statement.executeQuery(sql);
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 Question question = new Question(resultSet.getString("Question"), resultSet.getInt("QuestID"));
                 questList.add(question);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -107,20 +107,20 @@ public class DBConnection {
         return questList;
     }
 
-    public List<Answer> answerList(int questID){
-        List<Answer> answerList= new ArrayList<>();
+    public List<Answer> answerList(int questID) {
+        List<Answer> answerList = new ArrayList<>();
         sql = "SELECT Answer, Correctness FROM Answer"
-        + " INNER JOIN QuestAnswer ON Answer.AnswerID = QuestAnswer.AnswerID"
-       + " WHERE QuestID=" + questID + ";";
-        try{
+                + " INNER JOIN QuestAnswer ON Answer.AnswerID = QuestAnswer.AnswerID"
+                + " WHERE QuestID=" + questID + ";";
+        try {
             //Get 3 Answers
             ResultSet resultSet = statement.executeQuery(sql);
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 //Fill Answers for our List
                 Answer answer = new Answer(resultSet.getString("Answer"), resultSet.getBoolean("Correctness"));
                 answerList.add(answer);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -128,10 +128,10 @@ public class DBConnection {
         return answerList;
     }
 
-    private String findPassword(String nickname){
+    private String findPassword(String nickname) {
         String password = null;
         sql = "SELECT UserID FROM Users WHERE Nickname='" + nickname + "';";
-        try{
+        try {
             //Get an ID to find a password
             int id;
             ResultSet resultSet = statement.executeQuery(sql);
@@ -144,76 +144,171 @@ public class DBConnection {
             resultSet = statement.executeQuery(sql);
             resultSet.next();
             password = resultSet.getString("UserPassword");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             password = "Error";
         }
         return password;
     }
 
-    public User findUser(String nickname){
+    public User findUser(String nickname) {
         User user = null;
         sql = "SELECT * FROM Users WHERE Nickname='" + nickname + "';";
-        try{
+        try {
             ResultSet resultSet = statement.executeQuery(sql);
             resultSet.next();
 
             user = new User(resultSet.getString("Nickname"), resultSet.getString("Specialization"), resultSet.getString("Country"));
             user.setUserID(resultSet.getInt("UserID"));
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return user;
     }
 
-    public String setRating(Rating rating){
+    public String setRating(Rating rating) {
         sql = "INSERT INTO Rating (TestTheme, TestLevel, Rating, UserID)" +
                 " VALUES ('" + rating.getTestTheme() + "', '" + rating.getTestLevel() + "', " + rating.getRating() +
                 ", " + rating.getUserID() + ");";
         int rows;
         String res;
-        try{
+        try {
             rows = statement.executeUpdate(sql);
             System.out.println("SERVER >> " + rows + " Rating has been added!");
             res = "Success";
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
             res = "Error";
         }
         return res;
     }
 
-    public PrivateData checkRole(int userID){
+    public PrivateData checkRole(int userID) {
         sql = "SELECT UserRole FROM PrivateData " +
                 "WHERE UserID =" + userID + ";";
         PrivateData data = null;
-        try{
+        try {
             ResultSet resultSet = statement.executeQuery(sql);
             resultSet.next();
 
             data = new PrivateData();
             data.setRole(resultSet.getBoolean("UserRole"));
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return data;
     }
 
-    public List<Rating> getRatingList(int userID){
+    public List<Rating> getRatingList(int userID) {
         sql = "SELECT TestTheme, TestLevel, Rating FROM Rating " +
                 "WHERE UserID =" + userID + ";";
         List<Rating> ratingList = null;
-        try{
+        try {
             ResultSet resultSet = statement.executeQuery(sql);
             ratingList = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 ratingList.add(new Rating(resultSet.getString("TestTheme"),
                         resultSet.getInt("TestLevel"),
                         resultSet.getFloat("Rating")));
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return ratingList;
     }
+
+    public List<User> getUserList() {
+        sql = "SELECT * FROM Users";
+        List<User> userList = null;
+        try {
+            ResultSet resultSet = statement.executeQuery(sql);
+            userList = new ArrayList<>();
+            while (resultSet.next()) {
+                userList.add(new User(resultSet.getInt("UserID"),
+                        resultSet.getString("Nickname"),
+                        resultSet.getString("Specialization"),
+                        resultSet.getString("Country")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
+
+    public String updateAdmin(int userID) {
+        String access = null;
+        sql = "UPDATE PrivateData SET UserRole=1 WHERE UserID=" + userID + ";";
+        try {
+            int rows;
+            rows = statement.executeUpdate(sql);
+            if (rows > 0) {
+                access = "success";
+            } else {
+                access = "error";
+            }
+            System.out.println("SERVER>> " + rows + " HAS BEEN UPDATED");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            access = "error";
+        }
+        return access;
+    }
+
+    public String delUser(int userID) {
+        String access = null;
+        sql = "DELETE FROM Users WHERE UserID=" + userID + ";";
+        try {
+            int rows;
+            rows = statement.executeUpdate(sql);
+            if (rows > 0) {
+                access = "success";
+            } else {
+                access = "error";
+            }
+            System.out.println("SERVER>> " + rows + " HAS BEEN UPDATED");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            access = "error";
+        }
+        return access;
+    }
+
+    public void addTestDB(Question question, Answer answer) {
+        sql = "INSERT INTO Question (QuestTheme, QuestLevel,Question)" +
+                " VALUES ('" + question.getTheme() + "', " + question.getLevel() + ", '" + question.getQuestion() + "');";
+        int rows;
+        int questID;
+        int answID;
+        try {
+            //Added question in db and retrieve the questID
+            PreparedStatement prStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            rows = prStatement.executeUpdate();
+            System.out.println("SERVER >> " + rows + " Question has been added!");
+
+            ResultSet genKeys = prStatement.getGeneratedKeys();
+            genKeys.next();
+            questID = genKeys.getInt(1);
+
+            //Added answer in db and retrieve the questID
+            sql = "INSERT INTO Answer (Answer, Correctness)" +
+                    " VALUES ('" + answer.getAnswer() + "', '" + answer.isCorrect() + "');";
+            prStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            rows = prStatement.executeUpdate();
+            System.out.println("SERVER >> " + rows + " Answer has been added!");
+
+            ResultSet generatedKeys = prStatement.getGeneratedKeys();
+            generatedKeys.next();
+            answID = generatedKeys.getInt(1);
+
+            //Added ID's in questAnsw
+            sql = "INSERT INTO QuestAnswer (AnswerID, QuestID)" +
+                    " VALUES ('" + answID + "', " + questID + ");";
+            rows = statement.executeUpdate(sql);
+            System.out.println("SERVER >> " + rows + " QuestAnswer has been added!");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -8,6 +8,11 @@ public class Question implements Serializable {
     private int level;
     private String question;
 
+    public Question(String theme, int level, String question){
+        this.theme = theme;
+        this.level = level;
+        this.question = question;
+    }
     public Question(String question, int id){
         this.questID = id;
         this.question = question;
