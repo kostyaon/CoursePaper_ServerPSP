@@ -8,6 +8,13 @@ public class User implements Serializable {
     private String specialization;
     private String country;
 
+    public User(int id, String nickname, String specialization, String country){
+        this.userID = id;
+        this.nickname = nickname;
+        this.specialization = specialization;
+        this.country = country;
+    }
+
     public User(String nickname, String specialization, String country){
         if (country.equals("")){
             this.country = "UNKNOWN";

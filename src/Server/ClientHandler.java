@@ -210,6 +210,20 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private void sendUserList(){
+        List<User>userList;
+        try {
+            DBConnection connection = new DBConnection();
+            userList = connection.getUserList();
+
+            outObj.writeObject(userList);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         String choose;
@@ -243,6 +257,9 @@ public class ClientHandler extends Thread {
                         break;
                     case "Rating":
                         sendRatingList();
+                        break;
+                    case "User list":
+                        sendUserList();
                         break;
                     case "Exit":
                         socket.close();

@@ -216,4 +216,22 @@ public class DBConnection {
         }
         return ratingList;
     }
+
+    public List<User> getUserList(){
+        sql = "SELECT * FROM Users";
+        List<User> userList = null;
+        try {
+            ResultSet resultSet = statement.executeQuery(sql);
+            userList = new ArrayList<>();
+            while (resultSet.next()){
+                userList.add(new User(resultSet.getInt("UserID"),
+                        resultSet.getString("Nickname"),
+                        resultSet.getString("Specialization"),
+                        resultSet.getString("Country")));
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return userList;
+    }
 }
