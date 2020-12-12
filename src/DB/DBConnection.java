@@ -1,9 +1,6 @@
 package DB;
 
-import Models.Answer;
-import Models.Question;
-import Models.Rating;
-import Models.User;
+import Models.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -91,10 +88,8 @@ public class DBConnection {
     }
 
     public List<Question> questionList(String questTheme, int questLevel, int numberOfQuest){
-        //TODO: We can use a fixed size of Array
         List<Question> questList = new ArrayList<>();
 
-        //TODO: CHANGE TOP 3 on TOP 10
         sql = "SELECT Question, QuestID FROM Question WHERE Question IN" + "(SELECT TOP " + numberOfQuest + " Question FROM Question WHERE QuestTheme='"
                 + questTheme + "' AND QuestLevel=" + questLevel + " ORDER BY NEWID());";
         try{
@@ -113,7 +108,6 @@ public class DBConnection {
     }
 
     public List<Answer> answerList(int questID){
-        //TODO: We can use a fixed size of Array
         List<Answer> answerList= new ArrayList<>();
         sql = "SELECT Answer, Correctness FROM Answer"
         + " INNER JOIN QuestAnswer ON Answer.AnswerID = QuestAnswer.AnswerID"
@@ -187,5 +181,21 @@ public class DBConnection {
             res = "Error";
         }
         return res;
+    }
+
+    public PrivateData checkRole(int userID){
+        sql = "SELECT UserRole FROM PrivateData " +
+                "WHERE UserID =" + userID + ";";
+        PrivateData data = null;
+        try{
+            ResultSet resultSet = statement.executeQuery(sql);
+            resultSet.next();
+
+            data = new PrivateData();
+            data.setRole(resultSet.getBoolean("UserRole"));
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return data;
     }
 }

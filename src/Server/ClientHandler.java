@@ -1,10 +1,7 @@
 package Server;
 
 import DB.DBConnection;
-import Models.Answer;
-import Models.Question;
-import Models.Rating;
-import Models.User;
+import Models.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -174,6 +171,26 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private void sendPrivateData(){
+        PrivateData data;
+        int userID;
+        try{
+            //Get UserID
+            userID = (int) inObj.readObject();
+
+            //Retrieve from DB
+            DBConnection connection = new DBConnection();
+            data = connection.checkRole(userID);
+
+            outObj.writeObject(data);
+            outObj.flush();
+            connection.closeConnection();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         String choose;
@@ -187,6 +204,7 @@ public class ClientHandler extends Thread {
                         String access = checkPassword();
                         if (access.equalsIgnoreCase("Access")){
                             sendUser();
+                            sendPrivateData();
                             countRate();
                         }
                         break;
