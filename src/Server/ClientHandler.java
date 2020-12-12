@@ -256,6 +256,21 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private void addTest(){
+        Question question;
+        Answer answer;
+        try{
+            question = (Question) inObj.readObject();
+            answer = (Answer) inObj.readObject();
+
+            DBConnection connection = new DBConnection();
+            connection.addTestDB(question, answer);
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         String choose;
@@ -300,6 +315,9 @@ public class ClientHandler extends Thread {
                         }else{
                             delUser();
                         }
+                        break;
+                    case "Test":
+                        addTest();
                         break;
                     case "Exit":
                         socket.close();
