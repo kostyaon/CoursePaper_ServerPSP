@@ -234,4 +234,23 @@ public class DBConnection {
         }
         return userList;
     }
+
+    public String updateAdmin(int userID){
+        String access = null;
+        sql = "UPDATE PrivateData SET UserRole=1 WHERE UserID="+userID+";";
+        try{
+            int rows;
+            rows = statement.executeUpdate(sql);
+            if (rows > 0){
+                access = "success";   
+            }else{
+                access = "error";
+            }
+            System.out.println("SERVER>> " + rows + " HAS BEEN UPDATED");
+        }catch (SQLException e){
+            e.printStackTrace();
+            access = "error";
+        }
+        return access;
+    }
 }

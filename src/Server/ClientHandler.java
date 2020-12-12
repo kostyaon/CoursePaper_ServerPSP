@@ -224,6 +224,22 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private void updateAdmin(){
+        try{
+            //Retrieve userID
+            int userID = (int) inObj.readObject();
+
+            DBConnection connection = new DBConnection();
+            String success = connection.updateAdmin(userID);
+
+            outObj.writeObject(success);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         String choose;
@@ -260,6 +276,9 @@ public class ClientHandler extends Thread {
                         break;
                     case "User list":
                         sendUserList();
+                        break;
+                    case "Admin":
+                        updateAdmin();
                         break;
                     case "Exit":
                         socket.close();
