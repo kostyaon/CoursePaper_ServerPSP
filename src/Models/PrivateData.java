@@ -1,12 +1,12 @@
 package Models;
 
-public class PrivateData {
+import java.io.Serializable;
+
+public class PrivateData implements Serializable {
     private String password;
     private boolean role;
 
-    public PrivateData(String password){
-        this.password = password;
-        this.role = false;
+    public PrivateData(){
     }
 
     public void setPassword(String password) {
