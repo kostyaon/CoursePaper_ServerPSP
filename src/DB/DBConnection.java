@@ -198,4 +198,22 @@ public class DBConnection {
         }
         return data;
     }
+
+    public List<Rating> getRatingList(int userID){
+        sql = "SELECT TestTheme, TestLevel, Rating FROM Rating " +
+                "WHERE UserID =" + userID + ";";
+        List<Rating> ratingList = null;
+        try{
+            ResultSet resultSet = statement.executeQuery(sql);
+            ratingList = new ArrayList<>();
+            while(resultSet.next()){
+                ratingList.add(new Rating(resultSet.getString("TestTheme"),
+                        resultSet.getInt("TestLevel"),
+                        resultSet.getFloat("Rating")));
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return ratingList;
+    }
 }

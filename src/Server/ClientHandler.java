@@ -157,6 +157,7 @@ public class ClientHandler extends Thread {
         String res;
         try{
             //Get Rating
+            rating = new Rating();
             rating = (Rating) inObj.readObject();
 
             //Retrieve data from DB
@@ -186,6 +187,24 @@ public class ClientHandler extends Thread {
             outObj.flush();
             connection.closeConnection();
 
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void sendRatingList(){
+        int userID;
+        List<Rating> ratingList;
+        try{
+            userID = (int) inObj.readObject();
+
+            //Retrieve from DB
+            DBConnection connection = new DBConnection();
+            ratingList = connection.getRatingList(userID);
+
+            outObj.writeObject(ratingList);
+            outObj.flush();
+            connection.closeConnection();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -221,6 +240,9 @@ public class ClientHandler extends Thread {
                         break;
                     case "Insert rate":
                         sendRating();
+                        break;
+                    case "Rating":
+                        sendRatingList();
                         break;
                     case "Exit":
                         socket.close();
