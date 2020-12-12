@@ -1,10 +1,7 @@
 package Server;
 
 import DB.DBConnection;
-import Models.Answer;
-import Models.Question;
-import Models.Rating;
-import Models.User;
+import Models.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -23,9 +20,10 @@ public class ClientHandler extends Thread {
         this.outObj = outObj;
     }
 
-    private void checkPassword() {
+    private String checkPassword() {
         String nickname;
         String password;
+        String access = null;
         try {
             nickname = (String) inObj.readObject(); //Get TNickname
             System.out.println("CLIENT >> NICKNAME:" + nickname);
@@ -34,13 +32,15 @@ public class ClientHandler extends Thread {
 
             //Connect to the DB and find the password
             DBConnection connection = new DBConnection();
-            String access = connection.getAccess(nickname, password);
+            access = connection.getAccess(nickname, password);
             outObj.writeObject(access);
             outObj.flush();
             connection.closeConnection();
         } catch (Exception e) {
             e.printStackTrace();
+            access = "ERROR";
         }
+        return access;
     }
 
     private void countRate(){
@@ -80,6 +80,8 @@ public class ClientHandler extends Thread {
     }
 
     private void sendQuestList(){
+        String errMSG;
+
         String theme;
         int level;
         int numberOfQuest;
@@ -155,6 +157,7 @@ public class ClientHandler extends Thread {
         String res;
         try{
             //Get Rating
+            rating = new Rating();
             rating = (Rating) inObj.readObject();
 
             //Retrieve data from DB
@@ -162,6 +165,44 @@ public class ClientHandler extends Thread {
             res = connection.setRating(rating);
 
             outObj.writeObject(res);
+            outObj.flush();
+            connection.closeConnection();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void sendPrivateData(){
+        PrivateData data;
+        int userID;
+        try{
+            //Get UserID
+            userID = (int) inObj.readObject();
+
+            //Retrieve from DB
+            DBConnection connection = new DBConnection();
+            data = connection.checkRole(userID);
+
+            outObj.writeObject(data);
+            outObj.flush();
+            connection.closeConnection();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void sendRatingList(){
+        int userID;
+        List<Rating> ratingList;
+        try{
+            userID = (int) inObj.readObject();
+
+            //Retrieve from DB
+            DBConnection connection = new DBConnection();
+            ratingList = connection.getRatingList(userID);
+
+            outObj.writeObject(ratingList);
             outObj.flush();
             connection.closeConnection();
         }catch (Exception e){
@@ -179,9 +220,12 @@ public class ClientHandler extends Thread {
 
                 switch (choose){
                     case "Login":
-                        checkPassword();
-                        sendUser();
-                        countRate();
+                        String access = checkPassword();
+                        if (access.equalsIgnoreCase("Access")){
+                            sendUser();
+                            sendPrivateData();
+                            countRate();
+                        }
                         break;
                     case "Signup":
                         addUser();
@@ -197,13 +241,14 @@ public class ClientHandler extends Thread {
                     case "Insert rate":
                         sendRating();
                         break;
+                    case "Rating":
+                        sendRatingList();
+                        break;
                     case "Exit":
                         socket.close();
                         System.out.println("SERVER >> CLIENT IS DISCONNECTED");
-                        break;
+                        return;
                 }
-
-                //TODO: Add extra functionality
 
             }
         }catch (Exception e){

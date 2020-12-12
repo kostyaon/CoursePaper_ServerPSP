@@ -8,6 +8,15 @@ public class Rating implements Serializable {
     private float rating;
     private int userID;
 
+    public Rating(){
+
+    }
+    public Rating(String theme, int level, float rating){
+        this.testTheme = theme;
+        this.testLevel = level;
+        this.rating = rating;
+    }
+
     public void setUserID(int userID) {
         this.userID = userID;
     }
